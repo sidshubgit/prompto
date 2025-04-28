@@ -2,15 +2,18 @@
 import React from 'react';
 import SearchBar from '@/components/SearchBar';
 import { POPULAR_SEARCHES } from '@/data/promptTemplates';
-import { getSearchSuggestions } from '@/utils/searchUtils';
 import { Badge } from '@/components/ui/badge';
+import { useRecentSearches } from '@/hooks/useRecentSearches';
+import PromptCard from '@/components/PromptCard';
 
 const Index = () => {
+  const { recentSearches } = useRecentSearches();
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="py-6 px-4 text-center">
         <h1 className="text-4xl md:text-5xl font-extrabold bg-clip-text text-transparent brand-gradient mb-2">
-          PromptForge
+          Prompto
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
           Transform simple keywords into powerful AI prompt templates
@@ -25,6 +28,17 @@ const Index = () => {
             autoFocus={true}
           />
           
+          {recentSearches.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-lg font-semibold mb-4">Recently Viewed</h2>
+              <div className="grid grid-cols-1 gap-4">
+                {recentSearches.map((prompt) => (
+                  <PromptCard key={prompt.id} prompt={prompt} />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground mb-2">Popular searches:</p>
             <div className="flex flex-wrap justify-center gap-2">

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import SearchBar from '@/components/SearchBar';
@@ -6,12 +5,14 @@ import PromptCard, { PromptTemplate } from '@/components/PromptCard';
 import { searchPrompts, getSearchSuggestions } from '@/utils/searchUtils';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useRecentSearches } from '@/hooks/useRecentSearches';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const [results, setResults] = useState<PromptTemplate[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addRecentSearch } = useRecentSearches();
 
   useEffect(() => {
     setLoading(true);
@@ -20,11 +21,15 @@ const SearchResults = () => {
     const timer = setTimeout(() => {
       const searchResults = searchPrompts(query);
       setResults(searchResults);
+      // Add first result to recent searches if available
+      if (searchResults.length > 0) {
+        addRecentSearch(searchResults[0]);
+      }
       setLoading(false);
     }, 500);
     
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, addRecentSearch]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -32,7 +37,7 @@ const SearchResults = () => {
         <div className="container max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-4">
           <Link to="/" className="flex items-center gap-2 no-underline">
             <h1 className="text-2xl font-bold bg-clip-text text-transparent brand-gradient">
-              PromptForge
+              Prompto
             </h1>
           </Link>
           
