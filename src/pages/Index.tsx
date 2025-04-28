@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { Link } from 'react-router-dom';
 import SearchBar from '@/components/SearchBar';
 import { POPULAR_SEARCHES } from '@/data/promptTemplates';
 import { Badge } from '@/components/ui/badge';
@@ -28,9 +28,9 @@ const Index = () => {
             <p className="text-sm text-muted-foreground mb-2">Popular searches:</p>
             <div className="flex flex-wrap justify-center gap-2">
               {POPULAR_SEARCHES.slice(0, 8).map((term, index) => (
-                <a 
+                <Link 
                   key={index} 
-                  href={`/search?q=${encodeURIComponent(term)}`}
+                  to={`/search?q=${encodeURIComponent(term)}`}
                   className="no-underline"
                 >
                   <Badge 
@@ -39,7 +39,7 @@ const Index = () => {
                   >
                     {term}
                   </Badge>
-                </a>
+                </Link>
               ))}
             </div>
           </div>
