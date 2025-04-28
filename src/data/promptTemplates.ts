@@ -1,4 +1,3 @@
-
 import { PromptTemplate } from '@/components/PromptCard';
 
 export const POPULAR_SEARCHES = [
@@ -14,7 +13,7 @@ export const POPULAR_SEARCHES = [
   'email template'
 ];
 
-const promptTemplates: PromptTemplate[] = [
+export const promptTemplates: PromptTemplate[] = [
   {
     id: '1',
     title: 'Comprehensive Business Plan Generator',
