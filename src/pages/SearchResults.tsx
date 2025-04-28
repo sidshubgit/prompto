@@ -7,6 +7,7 @@ import { searchPrompts, getSearchSuggestions } from '@/utils/searchUtils';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useRecentSearches } from '@/hooks/useRecentSearches';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -17,35 +18,49 @@ const SearchResults = () => {
 
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
     
-    // Simulate API fetch delay with a minimum display time to prevent flickering
+    // Don't run search if query is empty
+    if (!query.trim()) {
+      setLoading(false);
+      setResults([]);
+      return;
+    }
+    
+    setLoading(true);
+    console.log("Searching for:", query);
+    
+    // Fetch results with a consistent minimum loading time
     const fetchResults = async () => {
       try {
-        // Simulate API fetch with minimum delay to prevent flickering
         const startTime = Date.now();
-        const searchResults = searchPrompts(query);
         
-        // Ensure a minimum display time for the loading state
+        // Get search results
+        const searchResults = searchPrompts(query);
+        console.log("Found results:", searchResults.length);
+        
+        // Ensure minimum loading time of 600ms to avoid flickering
         const elapsedTime = Date.now() - startTime;
-        const minimumDelay = 600; // milliseconds
+        const minimumDelay = 600;
         
         if (elapsedTime < minimumDelay) {
           await new Promise(resolve => setTimeout(resolve, minimumDelay - elapsedTime));
         }
         
+        // Only update state if component is still mounted
         if (isMounted) {
           setResults(searchResults);
+          setLoading(false);
+          
           // Add first result to recent searches if available
           if (searchResults.length > 0) {
             addRecentSearch(searchResults[0]);
           }
-          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching search results:", error);
         if (isMounted) {
           setLoading(false);
+          setResults([]);
         }
       }
     };
@@ -56,6 +71,15 @@ const SearchResults = () => {
       isMounted = false;
     };
   }, [query, addRecentSearch]);
+
+  // Render loading skeletons
+  const renderSkeletons = () => (
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      {[1, 2, 3, 4].map((i) => (
+        <Skeleton key={i} className="h-64 w-full" />
+      ))}
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -100,42 +124,40 @@ const SearchResults = () => {
           </Button>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-64 bg-muted rounded-lg animate-pulse" />
-            ))}
-          </div>
-        ) : results.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 min-h-[300px]">
-            {results.map((prompt) => (
-              <PromptCard key={prompt.id} prompt={prompt} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10">
-            <h3 className="text-xl font-medium mb-2">No prompts found</h3>
-            <p className="text-muted-foreground mb-4">
-              We couldn't find any prompt templates matching your search.
-            </p>
-            <div className="mt-4">
-              <p className="text-sm font-medium mb-2">Try searching for:</p>
-              <div className="flex flex-wrap justify-center gap-2">
-                {getSearchSuggestions('').map((term, index) => (
-                  <Link 
-                    key={index} 
-                    to={`/search?q=${encodeURIComponent(term)}`}
-                    className="no-underline"
-                  >
-                    <Button variant="outline" size="sm">
-                      {term}
-                    </Button>
-                  </Link>
-                ))}
+        <div className="min-h-[50vh]">
+          {loading ? (
+            renderSkeletons()
+          ) : results.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+              {results.map((prompt) => (
+                <PromptCard key={prompt.id} prompt={prompt} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10">
+              <h3 className="text-xl font-medium mb-2">No prompts found</h3>
+              <p className="text-muted-foreground mb-4">
+                We couldn't find any prompt templates matching your search.
+              </p>
+              <div className="mt-4">
+                <p className="text-sm font-medium mb-2">Try searching for:</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {getSearchSuggestions('').map((term, index) => (
+                    <Link 
+                      key={index} 
+                      to={`/search?q=${encodeURIComponent(term)}`}
+                      className="no-underline"
+                    >
+                      <Button variant="outline" size="sm">
+                        {term}
+                      </Button>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {!loading && recentSearches.length > 1 && (
           <div className="mt-8">
@@ -143,6 +165,7 @@ const SearchResults = () => {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
               {recentSearches
                 .filter(search => search.id !== (results[0]?.id || ''))
+                .slice(0, 3)
                 .map((prompt) => (
                   <PromptCard key={prompt.id} prompt={prompt} />
                 ))}

@@ -8,7 +8,10 @@ export const searchPrompts = (query: string): PromptTemplate[] => {
   
   const searchTerms = query.toLowerCase().trim().split(' ');
   
-  return promptTemplates.filter(prompt => {
+  // More thorough search with logging
+  console.log(`Searching with terms: ${searchTerms.join(', ')}`);
+  
+  const results = promptTemplates.filter(prompt => {
     // Search in title
     const titleMatch = prompt.title.toLowerCase().includes(query.toLowerCase());
     
@@ -27,6 +30,9 @@ export const searchPrompts = (query: string): PromptTemplate[] => {
     
     return titleMatch || keywordMatch || tagMatch || templateMatch;
   });
+  
+  console.log(`Search completed. Found ${results.length} results.`);
+  return results;
 };
 
 // Function to get related search suggestions for autocomplete
