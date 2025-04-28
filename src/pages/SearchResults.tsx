@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import SearchBar from '@/components/SearchBar';
 import PromptCard, { PromptTemplate } from '@/components/PromptCard';
 import { searchPrompts, getSearchSuggestions } from '@/utils/searchUtils';
@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const query = searchParams.get('q') || '';
   const [results, setResults] = useState<PromptTemplate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +89,7 @@ const SearchResults = () => {
               initialQuery={query} 
               onSearch={(newQuery) => {
                 if (newQuery !== query) {
-                  window.location.href = `/search?q=${encodeURIComponent(newQuery)}`;
+                  navigate(`/search?q=${encodeURIComponent(newQuery)}`);
                 }
               }}
               placeholderText="Refine your search..."
