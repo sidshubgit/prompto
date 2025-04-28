@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import SearchBar from '@/components/SearchBar';
@@ -6,7 +5,6 @@ import PromptCard, { PromptTemplate } from '@/components/PromptCard';
 import { searchPrompts, getSearchSuggestions } from '@/utils/searchUtils';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useRecentSearches } from '@/hooks/useRecentSearches';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const SearchResults = () => {
@@ -14,7 +12,6 @@ const SearchResults = () => {
   const query = searchParams.get('q') || '';
   const [results, setResults] = useState<PromptTemplate[]>([]);
   const [loading, setLoading] = useState(true);
-  const { recentSearches, addRecentSearch } = useRecentSearches();
 
   useEffect(() => {
     let isMounted = true;
@@ -50,11 +47,6 @@ const SearchResults = () => {
         if (isMounted) {
           setResults(searchResults);
           setLoading(false);
-          
-          // Add first result to recent searches if available
-          if (searchResults.length > 0) {
-            addRecentSearch(searchResults[0]);
-          }
         }
       } catch (error) {
         console.error("Error fetching search results:", error);
@@ -70,7 +62,7 @@ const SearchResults = () => {
     return () => {
       isMounted = false;
     };
-  }, [query, addRecentSearch]);
+  }, [query]);
 
   // Render loading skeletons
   const renderSkeletons = () => (
@@ -105,7 +97,7 @@ const SearchResults = () => {
         </div>
       </header>
 
-      <main className="flex-1 container max-w-6xl mx-auto py-6 px-4">
+      <main className="flex-1 container max-w-6xl mx-auto py-8 px-4">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold">
@@ -158,23 +150,9 @@ const SearchResults = () => {
             </div>
           )}
         </div>
-
-        {!loading && recentSearches.length > 1 && (
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold mb-4">Recently Viewed</h2>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-              {recentSearches
-                .filter(search => search.id !== (results[0]?.id || ''))
-                .slice(0, 3)
-                .map((prompt) => (
-                  <PromptCard key={prompt.id} prompt={prompt} />
-                ))}
-            </div>
-          </div>
-        )}
       </main>
 
-      <footer className="mt-auto py-4 border-t text-center text-sm text-muted-foreground">
+      <footer className="mt-auto py-6 text-center text-sm text-muted-foreground">
         <p>Find the perfect prompt template for any AI task</p>
       </footer>
     </div>
