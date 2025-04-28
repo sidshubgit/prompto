@@ -16,20 +16,45 @@ const SearchResults = () => {
   const { recentSearches, addRecentSearch } = useRecentSearches();
 
   useEffect(() => {
+    let isMounted = true;
     setLoading(true);
     
-    // Simulate API fetch delay
-    const timer = setTimeout(() => {
-      const searchResults = searchPrompts(query);
-      setResults(searchResults);
-      // Add first result to recent searches if available
-      if (searchResults.length > 0) {
-        addRecentSearch(searchResults[0]);
+    // Simulate API fetch delay with a minimum display time to prevent flickering
+    const fetchResults = async () => {
+      try {
+        // Simulate API fetch with minimum delay to prevent flickering
+        const startTime = Date.now();
+        const searchResults = searchPrompts(query);
+        
+        // Ensure a minimum display time for the loading state
+        const elapsedTime = Date.now() - startTime;
+        const minimumDelay = 600; // milliseconds
+        
+        if (elapsedTime < minimumDelay) {
+          await new Promise(resolve => setTimeout(resolve, minimumDelay - elapsedTime));
+        }
+        
+        if (isMounted) {
+          setResults(searchResults);
+          // Add first result to recent searches if available
+          if (searchResults.length > 0) {
+            addRecentSearch(searchResults[0]);
+          }
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching search results:", error);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
-    }, 500);
+    };
     
-    return () => clearTimeout(timer);
+    fetchResults();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [query, addRecentSearch]);
 
   return (
@@ -82,7 +107,7 @@ const SearchResults = () => {
             ))}
           </div>
         ) : results.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2 min-h-[300px]">
             {results.map((prompt) => (
               <PromptCard key={prompt.id} prompt={prompt} />
             ))}
