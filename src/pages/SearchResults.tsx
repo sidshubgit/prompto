@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import SearchBar from '@/components/SearchBar';
@@ -12,7 +13,7 @@ const SearchResults = () => {
   const query = searchParams.get('q') || '';
   const [results, setResults] = useState<PromptTemplate[]>([]);
   const [loading, setLoading] = useState(true);
-  const { addRecentSearch } = useRecentSearches();
+  const { recentSearches, addRecentSearch } = useRecentSearches();
 
   useEffect(() => {
     setLoading(true);
@@ -107,6 +108,19 @@ const SearchResults = () => {
                   </Link>
                 ))}
               </div>
+            </div>
+          </div>
+        )}
+
+        {!loading && recentSearches.length > 1 && (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold mb-4">Recently Viewed</h2>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
+              {recentSearches
+                .filter(search => search.id !== (results[0]?.id || ''))
+                .map((prompt) => (
+                  <PromptCard key={prompt.id} prompt={prompt} />
+                ))}
             </div>
           </div>
         )}

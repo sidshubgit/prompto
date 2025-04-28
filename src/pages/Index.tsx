@@ -3,12 +3,8 @@ import React from 'react';
 import SearchBar from '@/components/SearchBar';
 import { POPULAR_SEARCHES } from '@/data/promptTemplates';
 import { Badge } from '@/components/ui/badge';
-import { useRecentSearches } from '@/hooks/useRecentSearches';
-import PromptCard from '@/components/PromptCard';
 
 const Index = () => {
-  const { recentSearches } = useRecentSearches();
-
   return (
     <div className="min-h-screen flex flex-col">
       <header className="py-6 px-4 text-center">
@@ -28,17 +24,6 @@ const Index = () => {
             autoFocus={true}
           />
           
-          {recentSearches.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-lg font-semibold mb-4">Recently Viewed</h2>
-              <div className="grid grid-cols-1 gap-4">
-                {recentSearches.map((prompt) => (
-                  <PromptCard key={prompt.id} prompt={prompt} />
-                ))}
-              </div>
-            </div>
-          )}
-
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground mb-2">Popular searches:</p>
             <div className="flex flex-wrap justify-center gap-2">
